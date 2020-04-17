@@ -551,7 +551,16 @@ interface Memory{
 ~~~
 ######然后实现类实现接口
 ~~~
-       System.out.println("Intel CPU在工作");
+class AMDCpu implements Cpu{
+    @Override
+    public void run() {
+        System.out.println("AMD CPU在工作");
+    }
+}
+class IntelCpu implements Cpu{
+    @Override
+    public void run() {
+        System.out.println("Intel CPU在工作");
     }
 }
 class DDR3 implements Memory{
@@ -627,6 +636,242 @@ public static void main(String[] args) {
 所以依赖倒置原则的核心就是：`应该面向接口或抽象类编程`
 ### 5.迪米特法则(Low of Demeter)
 ##### 迪米特法则又叫：最少知识原则(Least Knowledge Principle) ,简称LKP 
+迪米特原则要求类要小气一点，类只和自己的朋友交流，不和陌生人说话。  
+朋友的定义：  
+`1. 当前对象本身this`  
+`2. 以参数的形式传入当前对象方法中的对象`  
+`3. 当前对象的类成员变量`  
+`4. 如果当前对象的类成员变量是一个集合，那么集合中的元素都是朋友`  
+`5. 当前对象所创建的对象`  
+迪米特法则的定义：两个类如果不必彼此直接通信，那么这两个类就不应该发生相互作用，如果其中一个类需要调用另一个类的某一个方法的，可以通过第三方转发这个调用。  
+**只和朋友交流**
+举例说明：  
+在大学中，有很多的院系，每个院系都有院长，辅导员和学生，院长只和辅导员打交道，而辅导员和学生打交道。因此院长和学生就是陌生人的关系。  
+假设院长要找几个学生干活，但是学生只听辅导员的，因为他不认识院长。  
+设计类：
+~~~
+public class Student {
+
+    public void work() {
+        System.out.println("学生干活");
+    }
+
+}
+public class Counsellor {
+
+    private Student student;
+    
+    public void makeStudentWork() {
+        this.student.work();
+    }
+    
+    public Student getStudent() {
+        return student;
+    }
+    
+    public void setStudent(Student student) {
+        this.student = student;
+    }
+}
+~~~
+首先我们看如果不使用迪米特原则，那么院长如果找学生干活的话：
+~~~
+public class President {
+
+    public void makeCounsellorWork() {
+            Student student = new Student();
+            this.counsellor.setStudent(student);
+            this.counsellor.makeStudentWork();
+        }
+    
+        public Counsellor getCounsellor() {
+            return counsellor;
+        }
+    
+        public void setCounsellor(Counsellor counsellor) {
+            this.counsellor = counsellor;
+        }
+}
+~~~
+因为学生不认识院长，只认识辅导员，因此院长首先要找到一个干活的学生，然后还要找到这个学生的辅导员，然后让这个辅导员指挥学生干活：
+~~~
+public class Traditional {
+
+    public static void main(String[] args) {
+        President president = new President();
+
+        Counsellor counsellor = new Counsellor();
+        president.setCounsellor(counsellor);
+        president.makeCounsellorWork();
+    }
+}
+~~~
+院长和学生是陌生人，但是在方法内却依赖了学生这个类，这不符合迪米特法则。我们想一下， 如果院长找学生干活的话，那么他应该直接找辅导员，说：给我找两个学生来干个活。
+找学生的事应该辅导员来做，而不是院长找学生。因此我们的方法，应该把找学生这个交给辅导员去做。
+~~~
+public class Counsellor {
+
+    private Student student;
+
+    public void makeStudentWork() {
+        this.student = new Student();
+        this.student.work();
+    }
+
+    public Student getStudent() {
+        return student;
+    }
+
+    public void setStudent(Student student) {
+        this.student = student;
+    }
+}
+~~~
+院长只需要告诉辅导员找个学生干活：
+~~~
+    public void makeCounsellorWork() {
+        this.counsellor.makeStudentWork();
+    }
+~~~
+至于辅导员怎么找学生，跟院长没有关系，当学生的方法属性等发生改变时，只需要更改辅导员类，而不需要修改院长这个类。  
+**尽量降低一个类的访问权限, 减少与朋友的交流**  
+迪米特法则要求类要小气一点，尽量建少与朋友的交流，也就是尽量少的提供public 方法,转而多使用private, default, protected等方法，尽量使类可以独立的完成自己的任务。   
+我们想象一下装软件的过程，在装软件的页面，根据我们的选择，点击下一步跳转不同的页面。我们来实现这个调用：
+~~~
+/**
+ * 假设一个软件，共有四个步骤：
+ * 执行流程，当进入安装页面首先调用第一个方法，
+ * 然后根据第一个方法的返回值决定调用第二个或者第三个方法。如果调用第二个方法则安装结束，如果调用第三个方法则根据返回结果决定是否调用第四个方法
+ * 并结束安装。
+ * @author ZhaoShuai
+ * @date Create in 2020/4/17
+ **/
+public class App {
+
+    public int first() {
+        System.out.println("开始安装，进行第一步");
+        return new Random().nextInt(4);
+    }
+
+    public void second() {
+        System.out.println("调用结束安装方法");
+    }
+
+    public int third() {
+        System.out.println("调用第三个方法");
+        return new Random().nextInt(3);
+    }
+
+    public void four() {
+        System.out.println("调用第四个方法");
+    }
+
+}
+public class Client {
+
+    public static void main(String[] args) {
+        App app = new App();
+
+        int first = app.first();
+        while (first == 1 || first == 0) {
+            first = app.first();
+        }
+
+        System.out.println("第一步返回结果：" + first);
+        if (first == 2) {
+            app.second();
+
+        } else if (first == 3) {
+
+            System.out.println("安装进行第二步");
+            int third = app.third();
+
+            System.out.println("第二步返回结果" + third);
+            if (third == 2) {
+
+                System.out.println("进行安装第三步");
+                app.four();
+                app.second();
+            }
+        }
+    }
+}
+~~~  
+方法很简单，我们会发现app类内部的方法，都是public的，而且会按照固定的模式去执行，而这个执行过程交给Client类来管理。也就是让客户端来决定下一步如何调用。
+这种设计中，客户端调用大量的app方法，就会使客户端与app两个类的耦合度过高。这时无论修改app内哪儿个方法的返回值，都需要修改客户端的调用代码返回值。    
+根据迪米特法则，我们可以把这个调用过程放进app类里面：  
+~~~
+public class App2 {
+
+    public void startRun() {
+        int first = this.first();
+        while (first == 1 || first == 0) {
+            first = this.first();
+        }
+
+        System.out.println("第一步返回结果：" + first);
+        if (first == 2) {
+            this.second();
+
+        } else if (first == 3) {
+
+            System.out.println("安装进行第二步");
+            int third = this.third();
+
+            System.out.println("第二步返回结果" + third);
+            if (third == 2) {
+
+                System.out.println("进行安装第三步");
+                this.four();
+                this.second();
+            }
+        }
+    }
+
+    private int first() {
+        System.out.println("开始安装，进行第一步");
+        return new Random().nextInt(4);
+    }
+
+    private void second() {
+        System.out.println("调用结束安装方法");
+    }
+
+    private int third() {
+        System.out.println("调用第三个方法");
+        return new Random().nextInt(3);
+    }
+
+    private void four() {
+        System.out.println("调用第四个方法");
+    }
+}
+public class Client2 {
+    public static void main(String[] args) {
+        App2 app2 = new App2();
+        app2.startRun();
+    }
+}
+~~~
+这样设计的意思就是：你已经是一个成熟的软件了，应该可以自己执行安装过程，而客户端只需要点击开始安装按钮，剩下的安装过程全都交给程序内部自己执行，这样设计
+无论app2类内部的方法如何改变，我们都只需要在类内部更改，与外部调用无关。这样就做到了解耦。根据迪米特法则，如果我们确定客户端与app类在同一个包下，由客户端来
+调用app2的安装，那么app2的类应该设计为包访问权限，即:`class App2{...}`  
+设计原则：  
+`1. 优先考虑设计成不变类final`  
+`2. 如果一个方法放在本类中，既不增加类间关系，也不对本类产生负面影响，那么就放置在本类中`  
+`3. 尽量减少类中的public方法，与接口隔离原则中接口要高内聚思想一样，类也要高内聚`  
+`4. 谨慎使用Serializable,如果使用到了RMI方式传递对象，那么这个对象必须实现Serializable接口`  
+迪米特法则的缺陷：  
+   迪米特法则要求降低类之间的耦合关系，如果要调用尽量通过第三方调用，但是这样就会导致产生大量的中间第三方类，这个类里的大量方法仅仅只是转发类的调用，没有其他实际意义。这样就会导致类的复杂性增加。
+
+
+
+
+
+
+
+
+
 
 ### 6.开闭原则(Open Close Principle)(OCP)
 #####开闭原则的核心思想：软件应该面对扩展是开放的，而面对修改是关闭的
