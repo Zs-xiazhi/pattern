@@ -1,5 +1,7 @@
 package com.xiazhi.principle.lkp.less;
 
+import javax.script.ScriptEngineManager;
+
 /**
  * @author ZhaoShuai
  * @date Create in 2020/4/17
@@ -31,5 +33,8 @@ public class Client {
                 app.second();
             }
         }
+
+        ScriptEngineManager scriptEngineManager = new ScriptEngineManager();
     }
+
 }
