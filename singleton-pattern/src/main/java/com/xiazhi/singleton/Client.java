@@ -20,23 +20,23 @@ public class Client {
     public void thread() {
 
         CountDownLatch countDownLatch = new CountDownLatch(2);
-        new Thread(()-> {
+        new Thread(() -> {
             try {
                 TimeUnit.SECONDS.sleep(5);
                 System.out.println("Leader.getInstance() = " + Leader.getInstance4());
             } catch (InterruptedException e) {
                 e.printStackTrace();
-            }finally {
+            } finally {
                 countDownLatch.countDown();
             }
         }).start();
-        new Thread(()-> {
+        new Thread(() -> {
             try {
                 TimeUnit.SECONDS.sleep(5);
                 System.out.println("Leader.getInstance() = " + Leader.getInstance4());
             } catch (InterruptedException e) {
                 e.printStackTrace();
-            }finally {
+            } finally {
                 countDownLatch.countDown();
             }
         }).start();

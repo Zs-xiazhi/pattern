@@ -20,9 +20,16 @@
         <module>bridge-pattern</module>
         <module>adapter-pattern</module>
         <module>decorator-pattern</module>
+        <module>facade-pattern</module>
+        <module>chain-pattern</module>
+        <module>observer-pattern</module>
+        <module>command-pattern</module>
+        <module>mediator-pattern</module>
+        <module>flyweight-pattern</module>
     </modules>
 
     <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.compiler.compilerVersion>1.8</maven.compiler.compilerVersion>
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
@@ -40,12 +47,43 @@
             <version>3.5.4</version>
         </dependency>
         <dependency>
+            <groupId>com.alibaba</groupId>
+            <artifactId>fastjson</artifactId>
+            <version>1.2.62</version>
+        </dependency>
+        <dependency>
             <groupId>org.jetbrains</groupId>
             <artifactId>annotations</artifactId>
             <version>16.0.3</version>
             <scope>compile</scope>
         </dependency>
     </dependencies>
+
+    <repositories>
+        <repository>
+            <id>zs-maven</id>
+            <url>http://192.168.1.45:8081/repository/maven-public/</url>
+            <releases>
+                <enabled>true</enabled>
+            </releases>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+        </repository>
+    </repositories>
+
+    <distributionManagement>
+        <repository>
+            <id>releases-nexus</id>
+            <url>http://192.168.1.45:8081/repository/maven-releases/</url>
+            <name>maven-releases</name>
+        </repository>
+        <snapshotRepository>
+            <id>snapshot-nexus</id>
+            <url>http://192.168.1.45:8081/repository/maven-snapshots/</url>
+            <name>maven-snapshots</name>
+        </snapshotRepository>
+    </distributionManagement>
 
 
 </project>
